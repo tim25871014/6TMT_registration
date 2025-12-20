@@ -135,6 +135,7 @@ async function initDb() {
     console.log('Using local JSON file database at', dataFile);
     await initFileDb();
   } else {
+    console.log('Using PostgreSQL database');
     await initPostgresDb();
   }
 }
