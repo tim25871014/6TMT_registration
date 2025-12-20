@@ -73,7 +73,7 @@
   ```powershell
   docker run --name 6tmt2-pg -e POSTGRES_PASSWORD=pgpass -e POSTGRES_USER=pguser -e POSTGRES_DB=6tmt2 -p 5432:5432 -v D:/artworks/6TMT2/pgdata:/var/lib/postgresql/data -d postgres:16
   ```
-  這樣資料會存在 `D:/artworks/6TMT2/pgdata` 資料夾。
+  這樣資料會存在 `../pgdata` 資料夾。
 
 ## Railway 雲端部署
 
