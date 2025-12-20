@@ -14,24 +14,24 @@
 
 請將 `.env.example` 複製為 `.env`，並依需求填寫：
 
-- `PORT`：本地伺服器埠號，預設 3000（Railway 會自動設定）
+- `PORT`：本地伺服器埠號，預設 3000(Railway 會自動設定)
 - `OSU_CLIENT_ID`：osu OAuth 應用的 Client ID
 - `OSU_CLIENT_SECRET`：osu OAuth 應用的 Secret
-- `OSU_REDIRECT_URI`：osu OAuth 註冊的 callback URL（本地測試用 `http://localhost:3000/auth/osu/callback`，Railway 請填正式網址）
-- `USE_POSTGRES`：設為 `true` 時啟用 PostgreSQL，否則預設用本地檔案（`data/participants.json`）儲存
-- `DATABASE_URL`：PostgreSQL 連線字串（Railway 會自動提供；本地測試請見下方說明）
+- `OSU_REDIRECT_URI`：osu OAuth 註冊的 callback URL(本地測試用 `http://localhost:3000/auth/osu/callback`，Railway 請填正式網址，通常會是`https://{PROJECT_NAME}.up.railway.app/auth/osu/callback`)
+- `USE_POSTGRES`：設為 `true` 時啟用 PostgreSQL資料庫，否則預設用本地檔案(`data/participants.json`)儲存
+- `DATABASE_URL`：PostgreSQL 連線字串(Railway 會自動提供；本地測試請見下方說明)
 - `PGSSLMODE`：Railway 請設 `require`，本地測試請設 `disable`
-- `ADMIN_TOKEN`：管理頁 API 權杖（可選，設了才需驗證）
+- `ADMIN_TOKEN`：管理頁密碼(可選，設了才需驗證)
 
-## 本地開發與測試
+## 本機開發與測試
 
-1. 安裝依賴：
+1. 安裝：
 
 	```bash
 	npm install
 	```
 
-2. 啟動開發伺服器（自動重啟）：
+2. 啟動伺服器(本機測試用)：
 
 	```bash
 	npm run dev
@@ -48,12 +48,12 @@
 - 若 `.env` 有設 `ADMIN_TOKEN`，請在頁面上方輸入 token 再操作
 - 可查詢、手動新增/更新、刪除玩家
 
-### 本地測試 PostgreSQL
+### 本機測試 PostgreSQL 資料庫 (可選)
 
-建議用 Docker 快速啟動本地資料庫：
+若要在本機測試 PostgreSQL 資料庫，請依下列步驟操作：
 
-1. 安裝 Docker Desktop 並啟動
-2. 在專案目錄執行：
+1. 安裝 [Docker Desktop](https://www.docker.com/products/docker-desktop/) 並啟動
+2. 在專案目錄執行以下指令，建立一個 PostgreSQL 容器：
 	```powershell
 	docker run --name 6tmt2-pg -e POSTGRES_PASSWORD=pgpass -e POSTGRES_USER=pguser -e POSTGRES_DB=6tmt2 -p 5432:5432 -d postgres:16
 	```
@@ -68,8 +68,8 @@
 #### 資料保存說明
 
 - 只要用 `docker stop 6tmt2-pg` / `docker start 6tmt2-pg`，資料都會保留
-- 用 `docker rm 6tmt2-pg` 才會刪除資料（除非有掛載 volume）
-- 若要永久保存資料（即使刪除容器），可用：
+- 用 `docker rm 6tmt2-pg` 才會刪除資料(除非有掛載 volume)
+- 若要永久保存資料(即使刪除容器)，可用：
   ```powershell
   docker run --name 6tmt2-pg -e POSTGRES_PASSWORD=pgpass -e POSTGRES_USER=pguser -e POSTGRES_DB=6tmt2 -p 5432:5432 -v D:/artworks/6TMT2/pgdata:/var/lib/postgresql/data -d postgres:16
   ```
@@ -77,15 +77,17 @@
 
 ## Railway 雲端部署
 
-1. 將專案 push 至 GitHub、GitLab 等
-2. Railway 新增專案，選擇「Deploy from Repo」並連接你的 repo
-3. Railway 介面新增 PostgreSQL plugin，會自動產生 `DATABASE_URL`
-4. Railway 設定下新增環境變數：
+1. 將專案 push 至 GitHub Repository
+2. 到 [Railway](https://railway.com/) 登入你的帳號，並且連結你的 GitHub 帳號
+2. 到 dashbord，點選右上角「+New」新增專案，選擇「GitHub Repository」並點選你剛剛的 Repository
+3. 新增專案後，進入你的專案頁面點選右上角「+Create」→「Database」→「Add PostgreSQL」新增資料庫，專案內會多出一個Postgres的框框，並且 Railway 會自動幫你設定 `DATABASE_URL` 環境變數
+4. 點擊你的Repo的框框，到Variables設定下新增環境變數：
 	- `OSU_CLIENT_ID`
 	- `OSU_CLIENT_SECRET`
-	- `OSU_REDIRECT_URI`（例：`https://你的-railway-app-url/auth/osu/callback`）
-5. Railway 會自動偵測 `npm start` 為啟動指令
-6. osu OAuth 後台記得加上 Railway callback URL
+	- `OSU_REDIRECT_URI`(例：`https://{PROJECT_NAME}.up.railway.app/auth/osu/callback`)
+	- `DATABASE_URL` (設定為`${{Postgres.DATABASE_URL}}`)
+5. Railway 會自動偵測 `npm start` 為啟動指令，如果兩個框框都亮綠燈表示部署成功
+6. osu OAuth 後台記得將 callback 設為 Railway callback URL，系統才會正確導回
 
 部署完成後，使用者可直接用 Railway 網址報名，資料會存進雲端 PostgreSQL。
 
