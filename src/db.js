@@ -36,9 +36,21 @@ async function initPostgresDb() {
         id SERIAL PRIMARY KEY,
         osu_user_id BIGINT UNIQUE NOT NULL,
         username TEXT NOT NULL,
+        discord_id TEXT,
+        global_rank_osu INTEGER,
+        country TEXT,
         registered_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
     `);
+    await client.query(
+      `ALTER TABLE participants ADD COLUMN IF NOT EXISTS global_rank_osu INTEGER;`
+    );
+    await client.query(
+      `ALTER TABLE participants ADD COLUMN IF NOT EXISTS discord_id TEXT;`
+    );
+    await client.query(
+      `ALTER TABLE participants ADD COLUMN IF NOT EXISTS country TEXT;`
+    );
   } finally {
     client.release();
   }
@@ -49,19 +61,28 @@ async function saveOrUpdateParticipantPostgres(user) {
 
   await poolInstance.query(
     `
-      INSERT INTO participants (osu_user_id, username)
-      VALUES ($1, $2)
+      INSERT INTO participants (osu_user_id, username, discord_id, global_rank_osu, country)
+      VALUES ($1, $2, $3, $4, $5)
       ON CONFLICT (osu_user_id)
-      DO UPDATE SET username = EXCLUDED.username;
+      DO UPDATE SET username = EXCLUDED.username,
+                    discord_id = EXCLUDED.discord_id,
+                    global_rank_osu = EXCLUDED.global_rank_osu,
+                    country = EXCLUDED.country;
     `,
-    [user.id, user.username]
+    [
+      user.id,
+      user.username,
+      user.discord_id ?? null,
+      user.global_rank_osu ?? null,
+      user.country ?? null
+    ]
   );
 }
 
 async function getAllParticipantsPostgres() {
   const poolInstance = getPool();
   const result = await poolInstance.query(
-    `SELECT osu_user_id, username, registered_at FROM participants ORDER BY registered_at DESC;`
+	`SELECT osu_user_id, username, discord_id, global_rank_osu, country, registered_at FROM participants ORDER BY registered_at DESC;`
   );
   return result.rows;
 }
@@ -107,10 +128,16 @@ async function saveOrUpdateParticipantFile(user) {
     list.push({
       osu_user_id: user.id,
       username: user.username,
+      discord_id: user.discord_id ?? null,
+      global_rank_osu: user.global_rank_osu ?? null,
+      country: user.country ?? null,
       registered_at: new Date().toISOString()
     });
   } else {
     list[index].username = user.username;
+    list[index].discord_id = user.discord_id ?? list[index].discord_id ?? null;
+    list[index].global_rank_osu = user.global_rank_osu ?? null;
+    list[index].country = user.country ?? list[index].country ?? null;
   }
 
   writeFileParticipants(list);

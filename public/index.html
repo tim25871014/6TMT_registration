@@ -3,13 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>6TMT2 報名頁面</title>
+    <title>6TMT2 比賽首頁</title>
     <style>
+          @font-face {
+            font-family: 'ErasBoldITC';
+            src: local('Eras Bold ITC'), local('ErasBoldITC'), url('/fonts/ErasBoldITC.woff2') format('woff2'), url('/fonts/ErasBoldITC.woff') format('woff');
+            font-weight: bold;
+            font-style: normal;
+          }
+      html {
+        min-height: 100vh;
+        background: linear-gradient(-60deg, #1a264c 0%, #111 50%, #480508 100%);
+      }
       body {
         margin: 0;
         padding: 0;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        background: radial-gradient(circle at top, #222 0, #111 45%, #050505 100%);
+        background: transparent;
         color: #f5f5f5;
         min-height: 100vh;
         display: flex;
@@ -17,74 +27,225 @@
         justify-content: center;
       }
 
-      .card {
-        background: rgba(10, 10, 15, 0.92);
-        border-radius: 18px;
-        padding: 32px 28px;
-        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
-        max-width: 420px;
+      .shell {
         width: 100%;
-        border: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 32px 20px;
+        display: flex;
+        justify-content: center;
       }
 
-      h1 {
-        margin: 0 0 6px;
-        font-size: 26px;
+      .hero {
+        background: rgba(10, 10, 18, 0.88);
+        border-radius: 20px;
+        padding: 24px 22px 20px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+        /* max-width: 420px; */
+        width: auto;
+        margin: 0 auto;
       }
 
-      p {
-        margin: 4px 0 16px;
-        line-height: 1.5;
-        font-size: 14px;
-        color: #d0d0d0;
+      .hero-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: center;
+        margin-bottom: 14px;
       }
 
-      .button {
+      .title-block h1 {
+        margin: 0;
+        font-size: 30px;
+        letter-spacing: 1px;
+      }
+      .title-block h1 img {
+        height: 240px !important;
+        max-width: 100%;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+      }
+      .eras {
+        font-family: 'ErasBoldITC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-weight: bold;
+        letter-spacing: 1px;
+        font-size: 70px;
+      }
+
+      .title-block p {
+        margin: 6px 0 0;
+        font-size: 13px;
+        color: #c9c9d9;
+      }
+
+      .primary-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 16px;
+        justify-content: center;
+      }
+
+      .primary-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        padding: 10px 18px;
+        padding: 14px 28px;
         border-radius: 999px;
         border: none;
         cursor: pointer;
-        background: linear-gradient(135deg, #ff66aa, #ffcc66);
-        color: #1a1a1a;
         font-weight: 600;
-        font-size: 15px;
+        font-size: 18px;
         text-decoration: none;
-        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.55);
+        white-space: nowrap;
         transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, filter 0.12s ease-out;
       }
 
-      .button:hover {
+      .primary-btn--register {
+        background: linear-gradient(135deg, #ff66aa, #ffcc66);
+        color: #1a1a1a;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65);
+      }
+
+      .primary-btn--list {
+        background: rgba(255, 255, 255, 0.08);
+        color: #f5f5f5;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+      }
+
+      .primary-btn:hover {
         transform: translateY(-1px);
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
-        filter: brightness(1.05);
+        filter: brightness(1.04);
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.8);
       }
 
-      .button:active {
+      .primary-btn:active {
         transform: translateY(0);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
-        filter: brightness(0.98);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+        filter: brightness(0.97);
       }
 
-      .hint {
+      .hero-main {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        margin-top: 12px;
+      }
+
+      .section-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffcc88;
+        margin-bottom: 6px;
+      }
+
+      .info-list {
+        margin: 0;
+        padding-left: 18px;
+        font-size: 13px;
+        color: #dedede;
+      }
+
+      .info-list li + li {
+        margin-top: 4px;
+      }
+
+      .links-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+        margin-top: 18px;
+      }
+
+      .icon-links {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .icon-btn {
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background:
+          linear-gradient(120deg, #e6e6e6 0%, #cccccc 40%, #bbbbbb 100%),
+          linear-gradient(60deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.0) 60%),
+          #CCCCCC;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #222;
+        text-decoration: none;
+        font-size: 18px;
+        font-weight: 600;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+        transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, background 0.12s ease-out;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .icon-btn:hover {
+        transform: translateY(-1px);
+        background:
+          linear-gradient(120deg, #f0f0f0 0%, #dddddd 40%, #bbbbbb 100%),
+          linear-gradient(60deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.0) 60%),
+          #bbbbbb;
+        box-shadow: 0 16px 35px rgba(0, 0, 0, 0.85);
+      }
+
+      .icon-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+      }
+
+      .links-caption {
         font-size: 12px;
-        color: #9a9a9a;
-        margin-top: 10px;
+        color: #bdbdd0;
+        text-align: right;
+      }
+
+      @media (max-width: 720px) {
+        .hero-main {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .links-grid {
+          align-items: flex-start;
+        }
+        .links-caption {
+          text-align: left;
+        }
       }
     </style>
   </head>
   <body>
-    <main class="card">
-      <h1>6TMT2 報名</h1>
-      <p>
-        點擊下方按鈕後，系統會帶你前往 osu! 官方授權頁面。
-        授權完成後，我們會取得你的 osu! 帳號資訊並完成報名。
-      </p>
-      <a class="button" href="/auth/osu">使用 osu! 帳號報名</a>
-      <p class="hint">我們只會儲存你的 osu! user id 與 username，用於本比賽用途。</p>
-    </main>
+    <div class="shell">
+      <section class="hero">
+        <header class="hero-header">
+          <div class="title-block">
+            <h1 style="margin:0;"><img src="/img/banner.png" alt="6TMT2" /></h1>
+          </div>
+        </header>
+
+        <div class="hero-main">
+          <div class="links-grid">
+            <div class="primary-actions">
+              <a href="/register.html" class="primary-btn primary-btn--register">點我報名</a>
+              <a href="/list" class="primary-btn primary-btn--list">查看玩家名單</a>
+            </div>
+            <div class="icon-links">
+              <a href="#" class="icon-btn" aria-label="Main sheet"><img src="https://cdn-icons-png.flaticon.com/512/2991/2991116.png" alt="Google Sheet" style="width:28px;height:28px;object-fit:contain;" /></a>
+              <a href="#" class="icon-btn" aria-label="Rule document"><img src="https://cdn-icons-png.flaticon.com/512/2991/2991112.png" alt="Google Doc" style="width:28px;height:28px;object-fit:contain;" /></a>
+              <a href="#" class="icon-btn" aria-label="Discord"><img src="https://cdn-icons-png.flaticon.com/512/5968/5968898.png" alt="Discord" style="width:28px;height:28px;object-fit:contain;" /></a>
+              <a href="#" class="icon-btn" aria-label="Twitch"><img src="https://cdn-icons-png.flaticon.com/512/5968/5968952.png" alt="Twitch" style="width:28px;height:28px;object-fit:contain;" /></a>
+              <a href="#" class="icon-btn" aria-label="YouTube"><img src="https://cdn-icons-png.flaticon.com/512/1384/1384028.png" alt="YouTube" style="width:28px;height:28px;object-fit:contain;" /></a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   </body>
-  </html>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>6TMT2 玩家列表</title>
+  <style>
+      @font-face {
+        font-family: 'ErasDemiITC';
+        src: local('Eras Demi ITC'), local('ErasDemiITC'), url('/fonts/ErasDemiITC.woff2') format('woff2'), url('/fonts/ErasDemiITC.woff') format('woff');
+        font-weight: 600;
+        font-style: normal;
+      }
+          .eras-demi {
+            font-family: 'ErasDemiITC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+          }
+      @font-face {
+        font-family: 'ErasBoldITC';
+        src: local('Eras Bold ITC'), local('ErasBoldITC'), url('/fonts/ErasBoldITC.woff2') format('woff2'), url('/fonts/ErasBoldITC.woff') format('woff');
+        font-weight: bold;
+        font-style: normal;
+      }
+    html {
+      min-height: 100vh;
+      background: linear-gradient(-60deg, #1a264c 0%, #111 50%, #480508 100%);
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: transparent;
+      color: #f5f5f5;
+    }
+    header {
+      padding: 18px 24px 10px;
+      background: linear-gradient(to right, #11111a, #1b1724);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    h1 {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: 1px;
+    }
+    .eras {
+      font-family: 'ErasBoldITC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    main {
+      padding: 24px 16px 32px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 15px;
+      background: rgba(255,255,255,0.01);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      text-align: left;
+      white-space: nowrap;
+    }
+    th {
+      background: rgba(255,255,255,0.04);
+      font-weight: 600;
+      color: #ffcc66;
+    }
+    tbody tr:nth-child(even) {
+      background: rgba(255,255,255,0.02);
+    }
+    .empty {
+      margin-top: 24px;
+      font-size: 16px;
+      color: #bbb;
+      text-align: center;
+    }
+    .rank {
+      font-weight: bold;
+      color: white;
+    }
+    .id {
+      color: #aaa;
+      font-size: 13px;
+    }
+    .avatar-hex {
+      width: 44px;
+      height: 44px;
+      vertical-align: middle;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1><span class="eras">6TMT2</span> 玩家列表</h1>
+  </header>
+  <main>
+    <div id="table-container"></div>
+  </main>
+  <script>
+    async function loadList() {
+      const res = await fetch('/api/admin/participants');
+      if (!res.ok) {
+        document.getElementById('table-container').innerHTML = '<p class="empty">無法載入名單</p>';
+        return;
+      }
+      let list = await res.json();
+      // 依 global_rank_osu 排序（null/未上榜排最後）
+      list = list.slice().sort((a, b) => {
+        if (a.global_rank_osu == null && b.global_rank_osu == null) return 0;
+        if (a.global_rank_osu == null) return 1;
+        if (b.global_rank_osu == null) return -1;
+        return a.global_rank_osu - b.global_rank_osu;
+      });
+      renderTable(list);
+    }
+    function renderTable(list) {
+      if (!list || list.length === 0) {
+        document.getElementById('table-container').innerHTML = '<p class="empty">目前尚無報名資料。</p>';
+        return;
+      }
+      const rows = list.map((p, i) => {
+        const rank = p.global_rank_osu != null ? `#${p.global_rank_osu}` : '-';
+        const flag = p.country ? `<img src="https://assets.ppy.sh/old-flags/${p.country.toUpperCase()}.png" alt="${p.country}" title="${p.country}" style="width:28px;height:20px;vertical-align:middle;border-radius:3px;background:#222;object-fit:cover;" loading="lazy" />` : '';
+        const avatar = `
+          <svg class="avatar-hex" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <defs>
+              <clipPath id="hexClip-${p.osu_user_id}">
+                <path d="M 53.5 4 L 88.1 24 Q 91.6 26 91.6 30 L 91.6 70 Q 91.6 74 88.1 76 L 53.5 96 Q 50 98 46.5 96 L 11.9 76 Q 8.4 74 8.4 70 L 8.4 30 Q 8.4 26 11.9 24 L 46.5 4 Q 50 2 53.5 4 Z" transform="rotate(15 50 50)" />
+              </clipPath>
+            </defs>
+            <image href="https://a.ppy.sh/${p.osu_user_id}" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid slice" clip-path="url(#hexClip-${p.osu_user_id})" />
+          </svg>
+        `;
+        return `<tr>
+          <td>${i + 1}</td>
+          <td class="id">${p.osu_user_id}</td>
+          <td>${flag}</td>
+          <td>${avatar}</td>
+          <td class="eras-demi">${p.username}</td>
+          <td>${p.discord_id ? p.discord_id : ''}</td>
+          <td class="rank">${rank}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('table-container').innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>user id</th>
+              <th>國家</th>
+              <th>大頭貼</th>
+              <th>玩家名稱</th>
+              <th>Discord ID</th>
+              <th>global rank</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+    window.addEventListener('load', loadList);
+  </script>
+</body>
+</html>

@@ -3,7 +3,12 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 
-const { getAuthorizationUrl, exchangeCodeForToken, fetchUserProfile } = require('./osuAuth');
+const {
+  getAuthorizationUrl,
+  exchangeCodeForToken,
+  fetchUserProfile,
+  fetchUserProfileById
+} = require('./osuAuth');
 const { initDb, saveOrUpdateParticipant, getAllParticipants, deleteParticipant } = require('./db');
 
 const app = express();
@@ -33,7 +38,12 @@ function requireAdminToken(req, res, next) {
 
 app.get('/auth/osu', (req, res) => {
   try {
-    const authUrl = getAuthorizationUrl();
+    const discordId = (req.query.discord_id || '').toString().trim();
+    if (!discordId) {
+      return res.status(400).send('Missing required discord_id.');
+    }
+
+    const authUrl = getAuthorizationUrl(discordId);
     res.redirect(authUrl);
   } catch (err) {
     console.error('Failed to create osu auth URL:', err);
@@ -41,8 +51,8 @@ app.get('/auth/osu', (req, res) => {
   }
 });
 
-// Admin API: list all participants
-app.get('/api/admin/participants', requireAdminToken, async (req, res) => {
+// Admin API: list all participants (公開只讀，不需要 Admin Token)
+app.get('/api/admin/participants', async (req, res) => {
   try {
     const participants = await getAllParticipants();
     res.json(participants);
@@ -55,10 +65,10 @@ app.get('/api/admin/participants', requireAdminToken, async (req, res) => {
 // Admin API: add or update a participant
 app.post('/api/admin/participants', requireAdminToken, async (req, res) => {
   try {
-    const { osu_user_id, username } = req.body || {};
+    const { osu_user_id, discord_id } = req.body || {};
 
-    if (!osu_user_id || !username) {
-      return res.status(400).json({ error: 'osu_user_id and username are required' });
+    if (!osu_user_id) {
+      return res.status(400).json({ error: 'osu_user_id is required' });
     }
 
     const userIdNum = Number(osu_user_id);
@@ -66,11 +76,45 @@ app.post('/api/admin/participants', requireAdminToken, async (req, res) => {
       return res.status(400).json({ error: 'osu_user_id must be a positive number' });
     }
 
-    await saveOrUpdateParticipant({ id: userIdNum, username: String(username) });
-    res.status(201).json({ ok: true });
+    const profile = await fetchUserProfileById(userIdNum);
+    if (!profile) {
+      return res.status(404).json({ error: 'osu user not found' });
+    }
+
+    // 合併 discord_id
+    await saveOrUpdateParticipant({ ...profile, discord_id: discord_id ?? null });
+    res.status(201).json({ ok: true, user: { ...profile, discord_id: discord_id ?? null } });
   } catch (err) {
     console.error('Failed to add/update participant:', err);
     res.status(500).json({ error: 'Failed to add/update participant' });
+  }
+});
+
+// Admin API: refresh all participants' username and global rank from osu API
+app.post('/api/admin/participants/refresh-all', requireAdminToken, async (req, res) => {
+  try {
+    const participants = await getAllParticipants();
+    let updated = 0;
+    let failed = 0;
+    for (const p of participants) {
+      try {
+        const profile = await fetchUserProfileById(p.osu_user_id);
+        if (profile) {
+          await saveOrUpdateParticipant(profile);
+          updated += 1;
+        } else {
+          failed += 1;
+        }
+      } catch (e) {
+        console.error('Failed to refresh participant', p.osu_user_id, e);
+        failed += 1;
+      }
+    }
+
+    res.json({ ok: true, updated, failed, total: participants.length });
+  } catch (err) {
+    console.error('Failed to refresh all participants:', err);
+    res.status(500).json({ error: 'Failed to refresh participants' });
   }
 });
 
@@ -95,8 +139,19 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'admin.html'));
 });
 
+// Register page
+app.get('/register', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'register.html'));
+});
+
+// Public registration list page
+app.get('/list', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'list.html'));
+});
+
 app.get('/auth/osu/callback', async (req, res) => {
   const code = req.query.code;
+  const discordId = (req.query.state || '').toString().trim();
 
   if (!code) {
     return res.status(400).send('Missing authorization code from osu!.');
@@ -106,7 +161,10 @@ app.get('/auth/osu/callback', async (req, res) => {
     const tokenData = await exchangeCodeForToken(code);
     const user = await fetchUserProfile(tokenData.access_token);
 
-    await saveOrUpdateParticipant(user);
+    await saveOrUpdateParticipant({
+      ...user,
+      discord_id: discordId || null
+    });
 
     res.send(
       `<h1>報名成功！</h1>` +

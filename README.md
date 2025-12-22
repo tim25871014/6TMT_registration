@@ -5,9 +5,9 @@
 
 ## 功能特色
 
-- 首頁有「使用 osu! 帳號報名」按鈕
+- 首頁有「使用 osu! 帳號報名」按鈕，並要求填寫 Discord ID
 - 點擊後導向 osu! OAuth2 授權頁，授權後自動取得玩家資訊
-- 取得玩家 user id、username，存入 PostgreSQL 或本地檔案
+- 取得玩家 user id、username、標準模式 (osu) 全球排名與 Discord ID，存入 PostgreSQL 或本地檔案
 - 提供管理員頁面，可查詢、手動新增、刪除玩家
 
 ## 環境變數設定
@@ -45,8 +45,9 @@
 ### 管理員頁面
 
 - http://localhost:3000/admin
-- 若 `.env` 有設 `ADMIN_TOKEN`，請在頁面上方輸入 token 再操作
-- 可查詢、手動新增/更新、刪除玩家
+- 名單查詢是公開只讀的；若 `.env` 有設 `ADMIN_TOKEN`，只有在「新增 / 更新」、「刪除」、「重新整理所有玩家」這些會修改資料的操作時才需要在頁面上方輸入 token
+- 可查詢、手動新增/更新、刪除玩家，並顯示該玩家在 osu 標準模式下的全球排名
+- 一鍵重新整理所有玩家的 username 與全球排名（透過 osu API）
 
 ### 本機測試 PostgreSQL 資料庫 (可選)
 
