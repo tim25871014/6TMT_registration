@@ -320,7 +320,7 @@
       loadBtn.addEventListener('click', loadParticipants);
       addBtn.addEventListener('click', addParticipant);
       refreshAllBtn.addEventListener('click', async () => {
-        if (!confirm('確定要重新整理所有玩家的 username 與 global rank 嗎？')) {
+        if (!confirm('確定要重新整理所有玩家的 username 與 global rank 嗎？ (會呼叫API，請注意速率限制)')) {
           return;
         }
 
