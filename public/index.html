@@ -40,9 +40,21 @@
         padding: 24px 22px 20px;
         border: 1px solid rgba(255, 255, 255, 0.08);
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
-        /* max-width: 420px; */
+        width: auto;
         width: auto;
         margin: 0 auto;
+      }
+
+      @media (min-width: 720px) {
+        .hero {
+          width: 80%;
+        }
+      }
+
+      @media (min-width: 1080px) {
+        .hero {
+          width: 70%;
+        }
       }
 
       .hero-header {
