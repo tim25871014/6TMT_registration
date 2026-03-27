@@ -36,6 +36,37 @@ function requireAdminToken(req, res, next) {
   return res.status(401).json({ error: 'Unauthorized' });
 }
 
+function escapeCsv(value) {
+  const safe = value == null ? '' : String(value);
+  return `"${safe.replace(/"/g, '""')}"`;
+}
+
+function buildParticipantsCsv(participants) {
+  const headers = [
+    'osu_user_id',
+    'username',
+    'country',
+    'discord_id',
+    'global_rank_osu',
+    'registered_at'
+  ];
+
+  const rows = participants.map((p) => {
+    return [
+      p.osu_user_id,
+      p.username,
+      p.country || '',
+      p.discord_id || '',
+      p.global_rank_osu ?? '',
+      p.registered_at || ''
+    ]
+      .map(escapeCsv)
+      .join(',');
+  });
+
+  return [headers.join(','), ...rows].join('\n');
+}
+
 app.get('/auth/osu', (req, res) => {
   try {
     const discordId = (req.query.discord_id || '').toString().trim();
@@ -115,6 +146,21 @@ app.post('/api/admin/participants/refresh-all', requireAdminToken, async (req, r
   } catch (err) {
     console.error('Failed to refresh all participants:', err);
     res.status(500).json({ error: 'Failed to refresh participants' });
+  }
+});
+
+// Admin API: export participants as CSV (requires Admin Token)
+app.get('/api/admin/participants/export.csv', requireAdminToken, async (req, res) => {
+  try {
+    const participants = await getAllParticipants();
+    const csv = '\uFEFF' + buildParticipantsCsv(participants);
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', 'attachment; filename="participants.csv"');
+    res.send(csv);
+  } catch (err) {
+    console.error('Failed to export participants CSV:', err);
+    res.status(500).json({ error: 'Failed to export participants CSV' });
   }
 });
 

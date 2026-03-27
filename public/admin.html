@@ -142,6 +142,7 @@
         </label>
         <button id="load">重新載入名單</button>
         <button id="refresh-all">更新所有玩家</button>
+        <button id="export-csv">匯出資料</button>
         <span class="status" id="status"></span>
       </div>
 
@@ -161,6 +162,7 @@
       const tokenInput = document.getElementById('token');
       const loadBtn = document.getElementById('load');
       const refreshAllBtn = document.getElementById('refresh-all');
+      const exportCsvBtn = document.getElementById('export-csv');
       const statusEl = document.getElementById('status');
       const tableContainer = document.getElementById('table-container');
       const newIdInput = document.getElementById('new-id');
@@ -200,6 +202,59 @@
           tableContainer.innerHTML = '';
         } finally {
           loadBtn.disabled = false;
+        }
+      }
+
+      async function exportParticipantsCsv() {
+        const token = tokenInput.value.trim();
+        if (!token) {
+          statusEl.textContent = '匯出資料需要 Admin Token';
+          return;
+        }
+
+        exportCsvBtn.disabled = true;
+        statusEl.textContent = '準備匯出中...';
+
+        try {
+          const res = await fetch('/api/admin/participants/export.csv', {
+            method: 'GET',
+            headers: buildHeaders(false)
+          });
+
+          if (!res.ok) {
+            if (res.status === 401) {
+              throw new Error('Admin Token 無效或未授權');
+            }
+            const text = await res.text();
+            throw new Error(text || 'HTTP ' + res.status);
+          }
+
+          const blob = await res.blob();
+          const now = new Date();
+          const timestamp =
+            String(now.getFullYear()) +
+            String(now.getMonth() + 1).padStart(2, '0') +
+            String(now.getDate()).padStart(2, '0') +
+            '_' +
+            String(now.getHours()).padStart(2, '0') +
+            String(now.getMinutes()).padStart(2, '0') +
+            String(now.getSeconds()).padStart(2, '0');
+
+          const filename = `participants_${timestamp}.csv`;
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(url);
+          statusEl.textContent = '已匯出 CSV';
+        } catch (err) {
+          console.error(err);
+          statusEl.textContent = '匯出失敗：' + err.message;
+        } finally {
+          exportCsvBtn.disabled = false;
         }
       }
 
@@ -319,6 +374,7 @@
 
       loadBtn.addEventListener('click', loadParticipants);
       addBtn.addEventListener('click', addParticipant);
+      exportCsvBtn.addEventListener('click', exportParticipantsCsv);
       refreshAllBtn.addEventListener('click', async () => {
         if (!confirm('確定要重新整理所有玩家的 username 與 global rank 嗎？ (會呼叫API，請注意速率限制)')) {
           return;
