@@ -78,9 +78,8 @@
 
 ## Railway 雲端部署
 
-1. 將專案 push 至 GitHub Repository
-2. 到 [Railway](https://railway.com/) 登入你的帳號，並且連結你的 GitHub 帳號
-2. 到 dashbord，點選右上角「+New」新增專案，選擇「GitHub Repository」並點選你剛剛的 Repository
+1. 到 [Railway](https://railway.com/) 登入你的帳號，並且連結你的 GitHub 帳號
+2. 到 dashbord，點選右上角「+New」新增專案，選擇「GitHub Repository」並點選這個 Repository `tim25871014/6TMT_registration` （或是把這個repo clone 下來之後推到你自己的 repo 上面）
 3. 新增專案後，進入你的專案頁面點選右上角「+Create」→「Database」→「Add PostgreSQL」新增資料庫，專案內會多出一個Postgres的框框，並且 Railway 會自動幫你設定 `DATABASE_URL` 環境變數
 4. 點擊專案中你的Repo的框框，到Variables設定下新增環境變數：
 	- `OSU_CLIENT_ID`：osu OAuth 應用的 Client ID
@@ -90,5 +89,5 @@
 5. Railway 會自動偵測 `npm start` 為啟動指令，如果兩個框框(repo與PostgreSQL)都亮綠燈表示部署成功
 6. osu OAuth 後台記得將 callback 設為 Railway callback URL，系統才會正確導回
 
-部署完成後，使用者可直接用 Railway 網址報名，資料會存進雲端 PostgreSQL。
+部署完成後，使用者可直接用 Railway 網址報名，資料會存進雲端 PostgreSQL，並且可以用管理頁面進行管理。
 
