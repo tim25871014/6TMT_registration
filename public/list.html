@@ -81,6 +81,19 @@
     tbody tr:nth-child(even) {
       background: rgba(255,255,255,0.02);
     }
+    tbody tr.rank-outside-range td {
+      background: rgba(90, 10, 10, 0.48);
+      color: rgba(245, 245, 245, 0.6);
+    }
+    tbody tr.rank-outside-range .rank,
+    tbody tr.rank-outside-range .id,
+    tbody tr.rank-outside-range .eras-demi {
+      color: rgba(245, 245, 245, 0.72);
+    }
+    tbody tr.rank-outside-range img,
+    tbody tr.rank-outside-range .avatar-hex {
+      opacity: 0.55;
+    }
     .empty {
       margin-top: 24px;
       font-size: 16px;
@@ -148,12 +161,25 @@
       });
       renderTable(list);
     }
+
+    function isRankInHighlightRange(rank) {
+      return Number.isFinite(rank) && rank >= 100000 && rank <= 999999;
+    }
+
+    function isCountryTw(country) {
+      return String(country || '').toUpperCase() === 'TW';
+    }
+
     function renderTable(list) {
       if (!list || list.length === 0) {
         document.getElementById('table-container').innerHTML = '<p class="empty">目前尚無報名資料。</p>';
         return;
       }
       const rows = list.map((p, i) => {
+        const rankValue = Number(p.global_rank_osu);
+        const isOutsideRange = !isRankInHighlightRange(rankValue);
+        const isNotTw = !isCountryTw(p.country);
+        const rowClass = isOutsideRange || isNotTw ? ' class="rank-outside-range"' : '';
         const rank = p.global_rank_osu != null ? `#${p.global_rank_osu}` : '-';
         const flag = p.country ? `<img src="https://assets.ppy.sh/old-flags/${p.country.toUpperCase()}.png" alt="${p.country}" title="${p.country}" style="width:28px;height:20px;vertical-align:middle;border-radius:3px;background:#222;object-fit:cover;" loading="lazy" />` : '';
         const avatar = `
@@ -166,7 +192,7 @@
             <image href="https://a.ppy.sh/${p.osu_user_id}" x="0" y="0" width="100" height="100" preserveAspectRatio="xMidYMid slice" clip-path="url(#hexClip-${p.osu_user_id})" />
           </svg>
         `;
-        return `<tr>
+        return `<tr${rowClass}>
           <td>${i + 1}</td>
           <td class="id">${p.osu_user_id}</td>
           <td>${flag}</td>
