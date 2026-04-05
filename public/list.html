@@ -43,6 +43,14 @@
       font-size: 26px;
       letter-spacing: 1px;
     }
+    .title-link {
+      color: inherit;
+      text-decoration: none;
+    }
+    .title-link:hover {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
     .eras {
       font-family: 'ErasBoldITC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       font-weight: bold;
@@ -115,6 +123,14 @@
       display: inline-block;
       transition: width 0.18s, height 0.18s;
     }
+    .name-link {
+      color: inherit;
+      text-decoration: none;
+    }
+    .name-link:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
       @media (max-width: 720px) {
         main {
           padding: 12px 2vw 18px;
@@ -139,7 +155,7 @@
 </head>
 <body>
   <header>
-    <h1><span class="eras">6TMT2</span> 玩家列表</h1>
+    <h1><a class="title-link" href="/"><span class="eras">6TMT2</span> 玩家列表</a></h1>
   </header>
   <main>
     <div id="table-container"></div>
@@ -197,7 +213,7 @@
           <td class="id">${p.osu_user_id}</td>
           <td>${flag}</td>
           <td>${avatar}</td>
-          <td class="eras-demi">${p.username}</td>
+          <td class="eras-demi"><a class="name-link" href="https://osu.ppy.sh/users/${encodeURIComponent(p.osu_user_id)}" target="_blank" rel="noopener noreferrer">${p.username}</a></td>
           <td>${p.discord_id ? p.discord_id : ''}</td>
           <td class="rank">${rank}</td>
         </tr>`;
