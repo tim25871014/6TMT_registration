@@ -53,8 +53,8 @@
         border-radius: 999px;
         border: none;
         cursor: pointer;
-        background: linear-gradient(135deg, #ff66aa, #ffcc66);
-        color: #1a1a1a;
+        background: linear-gradient(135deg, #2b2f3a, #444a5a);
+        color: #f5f5f5;
         font-weight: 600;
         font-size: 15px;
         text-decoration: none;
@@ -101,6 +101,47 @@
         outline: none;
         border-color: #ff66aa;
       }
+      #register-btn.button {
+        background: linear-gradient(135deg, #ff66aa, #ffcc66);
+        color: #1a1a1a;
+      }
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.72);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        z-index: 20;
+      }
+      .modal-backdrop.show {
+        display: flex;
+      }
+      .modal {
+        width: min(100%, 420px);
+        background: rgba(15, 15, 22, 0.98);
+        border-radius: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
+        padding: 20px;
+      }
+      .modal h2 {
+        margin: 0 0 10px;
+        font-size: 20px;
+      }
+      .modal p {
+        margin-bottom: 18px;
+      }
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .modal-actions .button.secondary {
+        background: linear-gradient(135deg, #ff66aa, #ffcc66);
+        color: #1a1a1a;
+      }
     </style>
   </head>
   <body>
@@ -117,11 +158,35 @@
       <button class="button" id="register-btn" type="button">使用 osu! 帳號報名</button>
       <p class="hint">我們會儲存你的 osu! user id、username、全球排名與 Discord ID，用於本比賽用途。</p>
     </main>
+    <div class="modal-backdrop" id="discord-modal" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="discord-modal-title">
+        <h2 id="discord-modal-title">報名前提醒</h2>
+        <p>所有賽事通知皆會在 6TMT2 的 Discord server 發布，請先確認你已經加入，再繼續報名。</p>
+        <div class="modal-actions">
+          <a class="button secondary" id="join-discord-btn" href="https://discord.gg/7nyKP3ra69" target="_blank" rel="noopener noreferrer">加入Discord伺服器</a>
+          <button class="button" id="already-joined-btn" type="button">已經加入了</button>
+        </div>
+      </div>
+    </div>
     <script>
       const discordInput = document.getElementById('discord');
       const registerBtn = document.getElementById('register-btn');
+      const discordModal = document.getElementById('discord-modal');
+      const alreadyJoinedBtn = document.getElementById('already-joined-btn');
+      const joinDiscordBtn = document.getElementById('join-discord-btn');
 
-      registerBtn.addEventListener('click', () => {
+      function openDiscordModal() {
+        discordModal.classList.add('show');
+        discordModal.setAttribute('aria-hidden', 'false');
+        alreadyJoinedBtn.focus();
+      }
+
+      function closeDiscordModal() {
+        discordModal.classList.remove('show');
+        discordModal.setAttribute('aria-hidden', 'true');
+      }
+
+      function startOsuAuth() {
         let discord = discordInput.value.trim();
         if (!discord) {
           alert('請先填寫你的 Discord ID');
@@ -134,6 +199,36 @@
         }
         const url = '/auth/osu?discord_id=' + encodeURIComponent(discord);
         window.location.href = url;
+      }
+
+      registerBtn.addEventListener('click', () => {
+        if (!discordInput.value.trim()) {
+          alert('請先填寫你的 Discord ID');
+          discordInput.focus();
+          return;
+        }
+        openDiscordModal();
+      });
+
+      alreadyJoinedBtn.addEventListener('click', () => {
+        closeDiscordModal();
+        startOsuAuth();
+      });
+
+      joinDiscordBtn.addEventListener('click', () => {
+        closeDiscordModal();
+      });
+
+      discordModal.addEventListener('click', (event) => {
+        if (event.target === discordModal) {
+          closeDiscordModal();
+        }
+      });
+
+      window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && discordModal.classList.contains('show')) {
+          closeDiscordModal();
+        }
       });
     </script>
   </body>
